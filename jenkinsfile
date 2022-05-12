@@ -1,7 +1,7 @@
 pipeline {
     agent any
     stages {
-        stage('Continuous Download') {
+        stage('Continuous Download-loans') {
             steps {
                 script
                 {
@@ -18,7 +18,7 @@ pipeline {
                 
             }
         }
-        stage('Continuous build') {
+        stage('Continuous build-loans') {
             steps {
                    script
                 {
@@ -35,31 +35,6 @@ pipeline {
                 
             }
         }
-        stage('Continuous Deployment') {
-            steps {
-                sh 'mvn package'
-            }
-        }
-        stage('Continuous Testing') {
-            steps {
-                git branch: 'main', url: 'https://github.com/Praveen7608/TestScripts22.git'
-                sh 'java -jar /var/lib/jenkins/workspace/scriptedpipeline/testing.jar'
-            }
-        }
-        
-    }
-    post
-    {
-        success
-        {
-            echo "from success block"
-            deploy adapters: [tomcat9(credentialsId: 'f3a368c3-8a7c-41ea-b2d2-f70206af14e4', path: '', url: 'http://172.31.27.54:8080')], contextPath: 'prodapp', war: '**/*.war'
-        }
-        failure
-        {
-            echo "from failure block"
-           mail bcc: '', body: 'got failed', cc: '', from: '', replyTo: '', subject: 'jenkins failed to perform activity', to: 'developer@gmail.com' 
-        }
-    }
+   }
 
 }
