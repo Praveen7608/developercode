@@ -1,0 +1,65 @@
+pipeline {
+    agent any
+    stages {
+        stage('Continuous Download') {
+            steps {
+                script
+                {
+                    try
+                    {
+                        git branch: 'main', url: 'https://github.com/Praveen7608/Maven22.git'   
+                    }
+                    catch (Exception e1)
+                    {
+                        mail bcc: '', body: 'got download fail', cc: '', from: '', replyTo: '', subject: 'jenkins failed to perform download activity', to: 'praveenranjith782@gmail.com'
+                        exit(1)
+                    }
+                }
+                
+            }
+        }
+        stage('Continuous build') {
+            steps {
+                   script
+                {
+                    try
+                    {
+                        sh 'mvn package'   
+                    }
+                    catch (Exception e2)
+                    {
+                        mail bcc: '', body: 'got build fail', cc: '', from: '', replyTo: '', subject: 'jenkins failed to perform build activity', to: 'developer@gmail.com'
+                        exit(1)
+                    }
+                }
+                
+            }
+        }
+        stage('Continuous Deployment') {
+            steps {
+                sh 'mvn package'
+            }
+        }
+        stage('Continuous Testing') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Praveen7608/TestScripts22.git'
+                sh 'java -jar /var/lib/jenkins/workspace/scriptedpipeline/testing.jar'
+            }
+        }
+        
+    }
+    post
+    {
+        success
+        {
+            echo "from success block"
+            deploy adapters: [tomcat9(credentialsId: 'f3a368c3-8a7c-41ea-b2d2-f70206af14e4', path: '', url: 'http://172.31.27.54:8080')], contextPath: 'prodapp', war: '**/*.war'
+        }
+        failure
+        {
+            echo "from failure block"
+           mail bcc: '', body: 'got failed', cc: '', from: '', replyTo: '', subject: 'jenkins failed to perform activity', to: 'developer@gmail.com' 
+        }
+    }
+
+}
